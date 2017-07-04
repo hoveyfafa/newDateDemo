@@ -21,13 +21,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by carme on 2017/7/3.
@@ -36,6 +34,7 @@ import java.util.Locale;
 public class CalendarView extends LinearLayout implements View.OnTouchListener,
         Animation.AnimationListener, GestureDetector.OnGestureListener {
     private String TAG = "------TAG------";
+
     /**
      * 点击日历
      */
@@ -145,7 +144,6 @@ public class CalendarView extends LinearLayout implements View.OnTouchListener,
         generateTopView();
 
 
-
         // 底部显示日历
         viewFlipper = new ViewFlipper(mContext);
         RelativeLayout.LayoutParams fliper_params = new RelativeLayout.LayoutParams(
@@ -209,8 +207,9 @@ public class CalendarView extends LinearLayout implements View.OnTouchListener,
         top.addView(mTitle);
 
     }
+
     @SuppressWarnings("deprecation")
-    private void generateBottomView(){
+    private void generateBottomView() {
         RelativeLayout bottom = new RelativeLayout(mContext);
         bottom.setBackgroundColor(getResources().getColor(R.color.white));
         LinearLayout.LayoutParams bottom_params = new LinearLayout.LayoutParams(
@@ -234,6 +233,7 @@ public class CalendarView extends LinearLayout implements View.OnTouchListener,
         bottomTv.setText("2014年9月");
         bottom.addView(bottomTv);
     }
+
     /**
      * 生成中间显示week
      */
@@ -276,6 +276,7 @@ public class CalendarView extends LinearLayout implements View.OnTouchListener,
         gView1.setId(calLayoutID);
 
         gView2 = new CalendarGridView(mContext);
+        tempSelected2.add(Calendar.MONTH,1);
         gAdapter = new CalendarGridViewAdapter(mContext, tempSelected2,
                 markDates);
         gView2.setAdapter(gAdapter);// 设置菜单Adapter
@@ -299,22 +300,25 @@ public class CalendarView extends LinearLayout implements View.OnTouchListener,
         viewFlipper.addView(gView2);
 //        viewFlipper.addView(gView3);
 //        viewFlipper.addView(gView1);
-
+        int tempMonthTop = calStartDate.get(Calendar.MONTH) + 2 ;
+        if (tempMonthTop > 12 ){
+            tempMonthTop = tempMonthTop - 12 ;
+        }
         String title = calStartDate.get(Calendar.YEAR)
                 + "-"
-                + NumberHelper.LeftPad_Tow_Zero(calStartDate.get(Calendar.MONTH)+1) ;
+                + NumberHelper.LeftPad_Tow_Zero(tempMonthTop);
         mTitle.setText(title);
-//        if (!isFirst){
-            int tempMonth = calStartDate.get(Calendar.MONTH)+2;
-            int tempYear = calStartDate.get(Calendar.YEAR);
-            if (tempMonth > 12){
-                tempMonth = tempMonth-12;
-                tempYear = tempYear + 1 ;
-            }
-            String bottomString = tempYear
-                    +"-"
-                    +NumberHelper.LeftPad_Tow_Zero(tempMonth);
-            bottomTv.setText(bottomString);
+
+        int tempMonthBtm = calStartDate.get(Calendar.MONTH) + 3;
+        int tempYear = calStartDate.get(Calendar.YEAR);
+        if (tempMonthBtm > 12) {
+            tempMonthBtm = tempMonthBtm - 12;
+            tempYear = tempYear + 1;
+        }
+        String bottomString = tempYear
+                + "-"
+                + NumberHelper.LeftPad_Tow_Zero(tempMonthBtm);
+        bottomTv.setText(bottomString);
 //        }
 
     }
@@ -349,7 +353,7 @@ public class CalendarView extends LinearLayout implements View.OnTouchListener,
     private void UpdateStartDateForMonth() {
         calStartDate.set(Calendar.DATE, 1); // 设置成当月第一天
         iMonthViewCurrentMonth = calStartDate.get(Calendar.MONTH);// 得到当前日历显示的月
-        Log.i(TAG, "UpdateStartDateForMonth: "+ iMonthViewCurrentMonth);
+        Log.i(TAG, "UpdateStartDateForMonth: " + iMonthViewCurrentMonth);
         iMonthViewCurrentYear = calStartDate.get(Calendar.YEAR);// 得到当前日历显示的年
 
         // 星期一是2 星期天是1 填充剩余天数
@@ -411,19 +415,19 @@ public class CalendarView extends LinearLayout implements View.OnTouchListener,
             if (Math.abs(e1.getX() - e2.getX()) > SWIPE_MAX_OFF_PATH)
                 return false;
             if (e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE
-                    && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY){
+                    && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                 viewFlipper.setInAnimation(slideBottomIn);
                 viewFlipper.setOutAnimation(slideBottomOut);
                 viewFlipper.showNext();
                 setNextViewItem();
                 return true;
-            }else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE
-                    && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY ){
-                Log.i(TAG, "onFling: "+iMonthViewCurrentMonth);
-                Log.i(TAG, "onFling: "+((calNowDate.get(Calendar.MONTH))));
-                if (iMonthViewCurrentMonth == ((calNowDate.get(Calendar.MONTH)))){
+            } else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                Log.i(TAG, "onFling: " + iMonthViewCurrentMonth);
+                Log.i(TAG, "onFling: " + ((calNowDate.get(Calendar.MONTH))));
+                if (iMonthViewCurrentMonth == ((calNowDate.get(Calendar.MONTH))-1)) {
                     return false;
-                }else {
+                } else {
                     viewFlipper.setInAnimation(slideTopIn);
                     viewFlipper.setOutAnimation(slideTopOut);
                     viewFlipper.showPrevious();
@@ -621,7 +625,7 @@ class CalendarGridViewAdapter extends BaseAdapter {
         itemLayout.setGravity(Gravity.CENTER);
         itemLayout.setOrientation(1);
         itemLayout.setBackgroundColor(Color.WHITE);
-        itemLayout.setPadding(0,10,0,10);
+        itemLayout.setPadding(0, 10, 0, 10);
 
         Date myDate = (Date) getItem(position);
         itemLayout.setTag(myDate);
